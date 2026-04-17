@@ -607,6 +607,72 @@ body {
 .timestamp { text-align: center; color: #c4d0e0; font-size: 0.78rem; margin-top: 8px; }
 
 /* ============================================================
+   AREA MEDICO
+   ============================================================ */
+.med-header {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  color: white;
+}
+.med-header h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+.med-header p  { color: rgba(255,255,255,0.7); font-size: 0.88rem; margin: 0; }
+
+.codice-box {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border: 2px solid #a5d6a7;
+  border-radius: 12px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.codice-box .label { font-size: 0.78rem; font-weight: 700; color: #2e7d32; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.codice-box .codice { font-size: 1.6rem; font-weight: 900; color: #1b5e20; letter-spacing: 4px; font-family: 'Courier New', monospace; }
+.codice-box .hint   { font-size: 0.75rem; color: #388e3c; }
+
+/* Edit item in cartella medico */
+.edit-item {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: #fafbfc;
+  position: relative;
+}
+.edit-item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.edit-item-name { font-weight: 800; font-size: 0.97rem; color: var(--dark); }
+.edit-item-meta { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+.edit-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+.btn-edit { background: #e3f2fd; color: #0d47a1; border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.btn-edit:hover { background: #bbdefb; }
+.btn-del  { background: #ffebee; color: #c62828; border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.btn-del:hover { background: #ffcdd2; }
+
+.edit-form-inline {
+  background: #f9fbe7;
+  border: 1.5px dashed #c5e1a5;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 10px;
+  display: none;
+}
+
+.nota-medica {
+  background: #fffde7;
+  border-left: 4px solid #f9a825;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 0.88rem;
+}
+.nota-medica .nota-meta { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+/* ============================================================
    MODAL
    ============================================================ */
 .modal-overlay {
@@ -661,6 +727,7 @@ body {
     <a onclick="showView('home')">Home</a>
     <a onclick="showView('registrazione')">Registrati</a>
     <a onclick="showView('login')">Accedi</a>
+    <a onclick="showView('medico-login')" style="color:rgba(255,255,255,0.75)">&#x1F4BB; Area Medici</a>
     <a onclick="showView('admin-login')" style="color:rgba(255,255,255,0.4); font-size:0.78rem">Admin</a>
   </div>
   <div id="nav-user" style="display:none" class="navbar-user">
@@ -772,6 +839,13 @@ body {
           <div id="dash-qr" style="display:inline-block;border:4px solid var(--border);border-radius:10px;overflow:hidden;line-height:0"></div>
           <p class="qr-hint">In emergenza mostra questo codice al personale sanitario</p>
           <button class="btn btn-sm btn-outline btn-full" onclick="showEmergencyProfile()">Visualizza profilo</button>
+          <div class="codice-box" style="margin-top:16px" id="codice-medico-box">
+            <div>
+              <div class="label">&#x1F4BB; Codice accesso medici</div>
+              <div class="codice" id="codice-medico-val">——</div>
+              <div class="hint">Consegnalo al tuo medico curante</div>
+            </div>
+          </div>
         </div>
 
         <div class="card">
@@ -873,6 +947,125 @@ body {
   </div>
   <div class="emg-body" id="emg-body">
     <!-- Popolato da JS -->
+  </div>
+</div>
+
+<!-- ==================== MEDICO LOGIN ==================== -->
+<div class="view" id="view-medico-login">
+  <div class="container-sm">
+    <div class="card">
+      <div class="form-header">
+        <span class="icon">&#x1FA7A;</span>
+        <h2>Area Medici</h2>
+        <p>Accedi alla cartella clinica del paziente</p>
+      </div>
+      <div class="msg" id="msg-medico-login"></div>
+      <div class="row-2">
+        <div class="field"><label>Nome paziente</label><input type="text" id="ml-nome" placeholder="Mario"></div>
+        <div class="field"><label>Cognome paziente</label><input type="text" id="ml-cognome" placeholder="Rossi"></div>
+      </div>
+      <div class="field">
+        <label>Codice accesso paziente</label>
+        <input type="text" id="ml-codice" placeholder="es. A3F9-KZ2M" maxlength="9" style="text-transform:uppercase;letter-spacing:2px;font-size:1.1rem;font-weight:700">
+        <span class="hint">Il paziente lo trova nella sua dashboard QR Life</span>
+      </div>
+      <button class="btn btn-primary btn-full" style="background:#2e7d32" onclick="doMedicoLogin()">Accedi alla cartella</button>
+      <p class="form-footer"><a onclick="showView('home')">&#8592; Torna alla home</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MEDICO DASHBOARD ==================== -->
+<div class="view" id="view-medico">
+  <div class="container">
+
+    <div class="med-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2>&#x1FA7A; Cartella Clinica</h2>
+          <p id="med-paziente-label">Paziente: —</p>
+        </div>
+        <button class="btn btn-outline" style="border-color:rgba(255,255,255,0.5);color:white" onclick="medicoLogout()">Esci</button>
+      </div>
+    </div>
+
+    <div id="msg-medico" class="msg"></div>
+
+    <div class="grid-2">
+      <!-- Dati paziente -->
+      <div class="card">
+        <h3 style="font-weight:800;margin-bottom:14px;color:var(--dark)">&#128100; Dati Personali</h3>
+        <table class="info-table" id="med-info-table"></table>
+      </div>
+      <!-- Note mediche -->
+      <div class="card">
+        <div class="card-head">
+          <h3>&#128221; Note Mediche</h3>
+          <button class="btn btn-sm btn-primary" style="background:#2e7d32" onclick="toggleForm('nota')">+ Aggiungi</button>
+        </div>
+        <div class="inline-form" id="form-nota" style="display:none">
+          <div class="field"><label>Nota / aggiornamento clinico</label><textarea id="nota-testo" rows="3" placeholder="es. Pressione controllata, aggiustare dosaggio Ramipril..."></textarea></div>
+          <div class="inline-actions">
+            <button class="btn btn-sm btn-primary" style="background:#2e7d32" onclick="addNota()">Salva nota</button>
+            <button class="btn btn-sm btn-ghost" onclick="toggleForm('nota')">Annulla</button>
+          </div>
+        </div>
+        <div id="list-note"></div>
+      </div>
+    </div>
+
+    <!-- Patologie (editabili) -->
+    <div class="card">
+      <div class="card-head">
+        <h3>&#9763; Patologie</h3>
+        <button class="btn btn-sm btn-primary" onclick="toggleForm('med-pat')">+ Aggiungi</button>
+      </div>
+      <div class="inline-form" id="form-med-pat" style="display:none">
+        <div class="row-2">
+          <div class="field"><label>Nome patologia *</label><input type="text" id="mpt-nome" placeholder="es. Fibrillazione atriale"></div>
+          <div class="field"><label>Data diagnosi</label><input type="date" id="mpt-data"></div>
+        </div>
+        <div class="field"><label>Note cliniche</label><textarea id="mpt-desc" rows="2" placeholder="Dettagli clinici..."></textarea></div>
+        <div class="inline-actions">
+          <button class="btn btn-sm btn-primary" onclick="addMedPatologia()">Salva</button>
+          <button class="btn btn-sm btn-ghost" onclick="toggleForm('med-pat')">Annulla</button>
+        </div>
+      </div>
+      <div id="list-med-pat"></div>
+    </div>
+
+    <!-- Terapia (editabile) -->
+    <div class="card">
+      <div class="card-head">
+        <h3>&#128138; Terapia Farmacologica</h3>
+        <button class="btn btn-sm btn-primary" onclick="toggleForm('med-farm')">+ Aggiungi</button>
+      </div>
+      <div class="inline-form" id="form-med-farm" style="display:none">
+        <div class="row-2">
+          <div class="field"><label>Nome farmaco *</label><input type="text" id="mfm-nome" placeholder="es. Warfarin"></div>
+          <div class="field"><label>Principio attivo</label><input type="text" id="mfm-principio" placeholder="es. Warfarin sodico"></div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Dosaggio</label><input type="number" id="mfm-grammi" placeholder="es. 5" step="0.001" min="0"></div>
+          <div class="field"><label>Unità</label>
+            <select id="mfm-unita">
+              <option value="mg">mg</option><option value="g">g</option>
+              <option value="ml">ml</option><option value="mcg">mcg</option>
+              <option value="UI">UI</option><option value="compresse">compresse</option>
+            </select>
+          </div>
+          <div class="field"><label>Quantità</label><input type="number" id="mfm-qta" placeholder="es. 1" step="0.5" min="0"></div>
+        </div>
+        <div class="field"><label>Frequenza</label><input type="text" id="mfm-freq" placeholder="es. 1 volta al giorno, sera"></div>
+        <div class="field"><label>Note</label><textarea id="mfm-note" rows="2"></textarea></div>
+        <div class="inline-actions">
+          <button class="btn btn-sm btn-primary" onclick="addMedFarmaco()">Salva</button>
+          <button class="btn btn-sm btn-ghost" onclick="toggleForm('med-farm')">Annulla</button>
+        </div>
+      </div>
+      <div id="list-med-farm"></div>
+    </div>
+
   </div>
 </div>
 
@@ -1051,7 +1244,7 @@ function doRegister() {
   if (profili.find(p => p.cf === cf)) return showMsg('msg-reg','err','Codice Fiscale già registrato.');
 
   const newUser = { id: uid(), email, pwd, createdAt: new Date().toISOString() };
-  const newProfilo = { userId: newUser.id, nome, cognome, cf, nascita:'', tel:'', indirizzo:'', token: genToken(), createdAt: new Date().toISOString() };
+  const newProfilo = { userId: newUser.id, nome, cognome, cf, nascita:'', tel:'', indirizzo:'', gruppo:'', allergie:'', token: genToken(), codiceMedico: genCodiceMedico(), createdAt: new Date().toISOString() };
 
   users.push(newUser);
   profili.push(newProfilo);
@@ -1113,6 +1306,9 @@ function loadDashboard() {
   const qrEl     = document.getElementById('dash-qr');
   qrEl.innerHTML = '';
   new QRCode(qrEl, { text: emgUrl, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.H });
+
+  // Codice accesso medici
+  document.getElementById('codice-medico-val').textContent = p.codiceMedico || '——';
 
   renderPatologie();
   renderMedicine();
@@ -1362,7 +1558,142 @@ function openByToken(token) {
 }
 
 /* ============================================================
-   ADMIN
+   MEDICO
+   ============================================================ */
+let medicoTarget = null;
+
+function genCodiceMedico() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c = '';
+  for (let i = 0; i < 8; i++) { if (i === 4) c += '-'; c += chars[Math.floor(Math.random() * chars.length)]; }
+  return c;
+}
+
+function getNotes() { return load('ql_note') || []; }
+function saveNotes(d) { save('ql_note', d); }
+
+function doMedicoLogin() {
+  const nome    = document.getElementById('ml-nome').value.trim().toLowerCase();
+  const cognome = document.getElementById('ml-cognome').value.trim().toLowerCase();
+  const codice  = document.getElementById('ml-codice').value.trim().toUpperCase().replace(/[^A-Z0-9\-]/g,'');
+  if (!nome || !cognome || !codice) return showMsg('msg-medico-login','err','Compila tutti i campi.');
+  const p = getProfili().find(x => x.nome.toLowerCase()===nome && x.cognome.toLowerCase()===cognome && x.codiceMedico===codice);
+  if (!p) return showMsg('msg-medico-login','err','Dati non corretti. Verifica nome, cognome e codice.');
+  medicoTarget = p.userId;
+  loadMedicoDashboard();
+  showView('medico');
+}
+
+function medicoLogout() { medicoTarget = null; showView('home'); }
+
+function loadMedicoDashboard() {
+  const p = getProfilo(medicoTarget);
+  const user = getUsers().find(u => u.id === medicoTarget);
+  if (!p) return;
+  document.getElementById('med-paziente-label').textContent = 'Paziente: ' + p.nome + ' ' + p.cognome + ' — CF: ' + p.cf;
+  const eta = p.nascita ? Math.floor((Date.now()-new Date(p.nascita))/31557600000) : null;
+  document.getElementById('med-info-table').innerHTML = `
+    <tr><th>Cognome</th><td><strong>${escHtml(p.cognome)}</strong></td></tr>
+    <tr><th>Nome</th><td>${escHtml(p.nome)}</td></tr>
+    <tr><th>Cod. Fiscale</th><td><code>${escHtml(p.cf)}</code></td></tr>
+    ${p.nascita?`<tr><th>Nascita</th><td>${fmtDate(p.nascita)}${eta?` (${eta} anni)`:''}</td></tr>`:''}
+    ${p.gruppo?`<tr><th>Gruppo sang.</th><td><strong style="color:#c62828">${escHtml(p.gruppo)}</strong></td></tr>`:''}
+    ${p.allergie?`<tr><th>Allergie</th><td><strong style="color:#e65100">${escHtml(p.allergie)}</strong></td></tr>`:''}
+    ${p.tel?`<tr><th>Telefono</th><td>${escHtml(p.tel)}</td></tr>`:''}
+    ${user?`<tr><th>Email</th><td>${escHtml(user.email)}</td></tr>`:''}`;
+  renderMedNote(); renderMedPatologie(); renderMedFarmaci();
+}
+
+function addNota() {
+  const testo = document.getElementById('nota-testo').value.trim();
+  if (!testo) return alert('Scrivi la nota.');
+  const note = getNotes();
+  note.unshift({ id: uid(), userId: medicoTarget, testo, data: new Date().toISOString() });
+  saveNotes(note);
+  document.getElementById('nota-testo').value = '';
+  toggleForm('nota');
+  renderMedNote();
+}
+function deleteNota(id) {
+  if (!confirm('Eliminare questa nota?')) return;
+  saveNotes(getNotes().filter(n => n.id !== id));
+  renderMedNote();
+}
+function renderMedNote() {
+  const mine = getNotes().filter(n => n.userId === medicoTarget);
+  const el = document.getElementById('list-note');
+  if (!mine.length) { el.innerHTML = '<p class="empty">Nessuna nota clinica.</p>'; return; }
+  el.innerHTML = mine.map(n => `
+    <div class="nota-medica">
+      <div style="display:flex;justify-content:space-between;gap:8px">
+        <span>${escHtml(n.testo)}</span>
+        <button class="btn-icon" style="font-size:1rem" onclick="deleteNota('${n.id}')">&times;</button>
+      </div>
+      <div class="nota-meta">&#128197; ${new Date(n.data).toLocaleDateString('it-IT')} ${new Date(n.data).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`).join('');
+}
+
+function addMedPatologia() {
+  const nome = document.getElementById('mpt-nome').value.trim();
+  if (!nome) return alert('Inserisci il nome.');
+  const pats = getPatologie();
+  pats.push({ id:uid(), userId:medicoTarget, nome, desc:document.getElementById('mpt-desc').value.trim(), data:document.getElementById('mpt-data').value, createdAt:new Date().toISOString() });
+  savePatologie(pats);
+  document.getElementById('mpt-nome').value=''; document.getElementById('mpt-desc').value=''; document.getElementById('mpt-data').value='';
+  toggleForm('med-pat'); renderMedPatologie();
+}
+function deleteMedPatologia(id) {
+  if (!confirm('Eliminare?')) return;
+  savePatologie(getPatologie().filter(p=>p.id!==id)); renderMedPatologie();
+}
+function renderMedPatologie() {
+  const mine = getPatologie().filter(p=>p.userId===medicoTarget);
+  const el = document.getElementById('list-med-pat');
+  if (!mine.length) { el.innerHTML='<p class="empty">Nessuna patologia.</p>'; return; }
+  el.innerHTML = mine.map(p=>`
+    <div class="edit-item">
+      <div class="edit-item-head">
+        <div>
+          <div class="edit-item-name">${escHtml(p.nome)}</div>
+          <div class="edit-item-meta">${p.data?'&#128197; '+fmtDate(p.data):''}${p.desc?' — '+escHtml(p.desc):''}</div>
+        </div>
+        <button class="btn-del" onclick="deleteMedPatologia('${p.id}')">&#128465; Elimina</button>
+      </div>
+    </div>`).join('');
+}
+
+function addMedFarmaco() {
+  const nome = document.getElementById('mfm-nome').value.trim();
+  if (!nome) return alert('Inserisci il nome.');
+  const meds = getMedicine();
+  meds.push({ id:uid(), userId:medicoTarget, nome, principio:document.getElementById('mfm-principio').value.trim(), grammi:parseFloat(document.getElementById('mfm-grammi').value)||null, unita:document.getElementById('mfm-unita').value, qta:parseFloat(document.getElementById('mfm-qta').value)||null, freq:document.getElementById('mfm-freq').value.trim(), note:document.getElementById('mfm-note').value.trim(), createdAt:new Date().toISOString() });
+  saveMedicine(meds);
+  ['mfm-nome','mfm-principio','mfm-grammi','mfm-qta','mfm-freq','mfm-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mfm-unita').value='mg';
+  toggleForm('med-farm'); renderMedFarmaci();
+}
+function deleteMedFarmaco(id) {
+  if (!confirm('Eliminare?')) return;
+  saveMedicine(getMedicine().filter(m=>m.id!==id)); renderMedFarmaci();
+}
+function renderMedFarmaci() {
+  const mine = getMedicine().filter(m=>m.userId===medicoTarget);
+  const el = document.getElementById('list-med-farm');
+  if (!mine.length) { el.innerHTML='<p class="empty">Nessuna terapia.</p>'; return; }
+  el.innerHTML = mine.map(m=>`
+    <div class="edit-item">
+      <div class="edit-item-head">
+        <div>
+          <div class="edit-item-name">${escHtml(m.nome)} ${m.grammi?`<span class="tag">${m.grammi} ${m.unita}</span>`:''} ${m.qta?`<span class="tag">×${m.qta}</span>`:''}</div>
+          <div class="edit-item-meta">${m.principio?escHtml(m.principio)+' — ':''}${escHtml(m.freq||'')}</div>
+        </div>
+        <button class="btn-del" onclick="deleteMedFarmaco('${m.id}')">&#128465; Elimina</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ============================================================
+   ADMIN — FUNZIONI
    ============================================================ */
 function doAdminLogin() {
   const u = document.getElementById('al-user').value.trim();
@@ -1498,6 +1829,11 @@ document.addEventListener('keydown', function(e) {
    INIT
    ============================================================ */
 window.addEventListener('load', function() {
+  // Migrazione: genera codiceMedico per profili esistenti
+  const profili = getProfili();
+  let migrated = false;
+  profili.forEach(p => { if (!p.codiceMedico) { p.codiceMedico = genCodiceMedico(); migrated = true; } });
+  if (migrated) saveProfili(profili);
   // Apertura da QR: index.html?token=XXX
   const params = new URLSearchParams(window.location.search);
   const token  = params.get('token');
