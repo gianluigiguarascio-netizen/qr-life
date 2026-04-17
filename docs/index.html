@@ -599,6 +599,61 @@ body {
 .emg-not-found h2 { font-size: 1.4rem; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
 .emg-not-found p  { color: var(--muted); }
 
+/* ============================================================
+   RESPONSIVE MOBILE
+   ============================================================ */
+@media (max-width: 480px) {
+
+  /* Navbar */
+  .navbar { padding: 0 14px; height: auto; min-height: 56px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+  .navbar-brand { font-size: 1rem; }
+  .navbar-brand div > div:first-child { font-size: 0.65rem; letter-spacing: 0.8px; }
+  .navbar-brand div > div:last-child  { font-size: 1.05rem; }
+  .navbar-links { gap: 6px; }
+  .navbar-links a { font-size: 0.78rem; padding: 4px 8px; }
+  .navbar-user span { display: none; }
+  .navbar-user .btn { padding: 5px 10px; font-size: 0.78rem; }
+
+  /* Header emergenza */
+  .emg-top { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+  .emg-top h1 { font-size: 1.05rem; letter-spacing: 0.5px; }
+  .emg-top p  { font-size: 0.75rem; }
+  .emg-logo   { display: none; }
+
+  /* Tessera paziente */
+  .emg-patient { grid-template-columns: 1fr; padding: 18px 16px; }
+  .emg-patient > div:last-child { display: none; }
+  .emg-patient-name { font-size: 1.6rem; }
+  .emg-patient-meta { font-size: 0.82rem; }
+
+  /* Badge allergie/gruppo */
+  .emg-badges { flex-wrap: wrap; }
+  .emg-badge  { font-size: 0.8rem; padding: 5px 12px; }
+
+  /* Sezioni */
+  .emg-section-head { font-size: 0.9rem; padding: 12px 16px; }
+  .emg-item { padding: 13px 16px; }
+  .emg-item-name { font-size: 0.97rem; }
+  .emg-dose { font-size: 1rem; }
+
+  /* Dash header */
+  .dash-header { padding: 18px 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .dash-welcome .icon { font-size: 1.6rem; }
+  .dash-welcome h2 { font-size: 1.1rem; }
+
+  /* Grid 2 col → 1 col */
+  .grid-2 { grid-template-columns: 1fr; }
+  .dash-grid { grid-template-columns: 1fr; }
+
+  /* Card padding ridotto */
+  .card { padding: 18px 16px; }
+  .card-head h3 { font-size: 0.95rem; }
+
+  /* Admin header */
+  .admin-header { padding: 18px 16px; }
+  .med-header { padding: 18px 16px; }
+}
+
 @media print {
   .emg-top, .emg-print-btn, nav { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .emg-print-btn { display: none; }
