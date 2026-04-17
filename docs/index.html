@@ -1300,12 +1300,21 @@ function loadDashboard() {
   document.getElementById('p-allergie').value = p.allergie || '';
   document.getElementById('p-indirizzo').value= p.indirizzo|| '';
 
-  // QR Code — usa IP di rete invece di localhost per test da smartphone
-  const baseUrl  = window.location.href.split('?')[0].replace('localhost', '192.168.1.84');
-  const emgUrl   = baseUrl + '?token=' + p.token;
-  const qrEl     = document.getElementById('dash-qr');
+  // QR Code — dati sanitari codificati in base64 nell'URL, funziona su qualsiasi device
+  const pats = getPatologie().filter(x => x.userId === currentUser.id);
+  const meds = getMedicine().filter(x => x.userId === currentUser.id);
+  const payload = btoa(unescape(encodeURIComponent(JSON.stringify({
+    nome: p.nome, cognome: p.cognome, cf: p.cf,
+    nascita: p.nascita, gruppo: p.gruppo, allergie: p.allergie,
+    tel: p.tel, indirizzo: p.indirizzo,
+    patologie: pats.map(x => ({ nome: x.nome, desc: x.desc, data: x.data })),
+    medicine: meds.map(x => ({ nome: x.nome, principio: x.principio, grammi: x.grammi, unita: x.unita, qta: x.qta, freq: x.freq, note: x.note }))
+  }))));
+  const baseUrl = window.location.href.split('?')[0].replace('localhost', '192.168.1.84');
+  const emgUrl  = baseUrl + '?d=' + payload;
+  const qrEl    = document.getElementById('dash-qr');
   qrEl.innerHTML = '';
-  new QRCode(qrEl, { text: emgUrl, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.H });
+  new QRCode(qrEl, { text: emgUrl, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.L });
 
   // Codice accesso medici
   document.getElementById('codice-medico-val').textContent = p.codiceMedico || '——';
@@ -1537,7 +1546,29 @@ function showEmergencyProfile() {
   showView('emergenza');
 }
 
-/* Apertura da QR (URL con ?token=) */
+/* Apertura da QR con dati inline (?d=base64) — funziona su qualsiasi device */
+function openByData(b64) {
+  try {
+    const p = JSON.parse(decodeURIComponent(escape(atob(b64))));
+    renderEmergenza(
+      { nome: p.nome, cognome: p.cognome, cf: p.cf, nascita: p.nascita,
+        gruppo: p.gruppo, allergie: p.allergie, tel: p.tel, indirizzo: p.indirizzo },
+      (p.patologie || []).map(x => ({ nome: x.nome, desc: x.desc, data: x.data })),
+      (p.medicine  || []).map(x => ({ nome: x.nome, principio: x.principio, grammi: x.grammi, unita: x.unita, qta: x.qta, freq: x.freq, note: x.note }))
+    );
+    showView('emergenza');
+  } catch(e) {
+    document.getElementById('emg-body').innerHTML = `
+      <div class="emg-not-found">
+        <span class="icon">&#10060;</span>
+        <h2>Errore nella lettura del QR</h2>
+        <p>Il codice QR non è leggibile o è danneggiato.</p>
+      </div>`;
+    showView('emergenza');
+  }
+}
+
+/* Apertura da QR (URL con ?token= — vecchio formato) */
 function openByToken(token) {
   const profili = getProfili();
   const p = profili.find(x => x.token === token);
@@ -1836,7 +1867,9 @@ window.addEventListener('load', function() {
   if (migrated) saveProfili(profili);
   // Apertura da QR: index.html?token=XXX
   const params = new URLSearchParams(window.location.search);
-  const token  = params.get('token');
+  const d = params.get('d');
+  if (d) { openByData(d); return; }
+  const token = params.get('token');
   if (token) { openByToken(token); return; }
 
   if (adminLogged) { loadAdmin(); showView('admin'); }
