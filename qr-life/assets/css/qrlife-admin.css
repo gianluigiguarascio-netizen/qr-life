@@ -1,0 +1,169 @@
+/* QR Life — Admin Styles */
+:root {
+    --ql-red:    #e53935;
+    --ql-dark:   #1a1a2e;
+    --ql-blue:   #0f3460;
+    --ql-white:  #ffffff;
+    --ql-gray:   #f8f9fa;
+    --ql-border: #e0e0e0;
+    --ql-radius: 10px;
+}
+
+.qrlife-admin-wrap {
+    max-width: 1100px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.qrlife-admin-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+    color: #fff;
+    border-radius: var(--ql-radius);
+    padding: 28px 32px;
+    margin: 16px 0 24px;
+}
+
+.qrlife-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.qrlife-heart {
+    font-size: 2rem;
+    color: #e94560;
+}
+
+.qrlife-admin-header h1 {
+    color: #fff;
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.qrlife-subtitle {
+    color: rgba(255,255,255,0.65);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.qrlife-back-btn {
+    display: inline-block;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+.qrlife-back-btn:hover { color: #fff; }
+
+/* Stats bar */
+.qrlife-stats-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.qrlife-stat {
+    background: #fff;
+    border: 1px solid var(--ql-border);
+    border-radius: var(--ql-radius);
+    padding: 16px 24px;
+    text-align: center;
+    min-width: 130px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.qrlife-stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--ql-red);
+    line-height: 1;
+}
+.qrlife-stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* Cards */
+.qrlife-card {
+    background: #fff;
+    border: 1px solid var(--ql-border);
+    border-radius: var(--ql-radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.qrlife-card h2 {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ql-dark);
+    border-bottom: 2px solid var(--ql-red);
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+/* Grid */
+.qrlife-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+@media (max-width: 800px) { .qrlife-grid-2 { grid-template-columns: 1fr; } }
+
+/* Info table */
+.qrlife-info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.qrlife-info-table th,
+.qrlife-info-table td {
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--ql-border);
+    text-align: left;
+}
+.qrlife-info-table th {
+    width: 40%;
+    color: #888;
+    font-weight: 600;
+}
+.qrlife-info-table td code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* Table */
+.qrlife-table { border-radius: var(--ql-radius); overflow: hidden; }
+.qrlife-table-wrap { overflow-x: auto; }
+.qrlife-table th, .qrlife-table td { font-size: 0.88rem; }
+
+/* Badges */
+.qrlife-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+.qrlife-badge.active   { background: #e8f5e9; color: #2e7d32; }
+.qrlife-badge.inactive { background: #fce4ec; color: #c62828; }
+
+/* QR card */
+.qrlife-qr-card { text-align: center; }
+.qrlife-qr-img {
+    border: 4px solid var(--ql-border);
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 10px;
+}
+.qrlife-qr-hint { font-size: 0.8rem; color: #aaa; }
+
+.qrlife-empty { color: #bbb; font-style: italic; text-align: center; padding: 24px 0; }

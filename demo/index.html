@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Life — Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* ============================================================
+   RESET & VARIABILI
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red:    #e53935;
+  --dark:   #1a1a2e;
+  --blue:   #0f3460;
+  --accent: #e94560;
+  --white:  #ffffff;
+  --gray:   #f5f7fa;
+  --border: #e2e8f0;
+  --text:   #2d3748;
+  --muted:  #718096;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--gray);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ============================================================
+   LAYOUT VIEWS
+   ============================================================ */
+.view { display: none; min-height: 100vh; }
+.view.active { display: block; }
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--blue) 100%);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+}
+.navbar-brand .heart { color: var(--accent); font-size: 1.4rem; }
+.navbar-links { display: flex; align-items: center; gap: 12px; }
+.navbar-links a {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.navbar-links a:hover, .navbar-links a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 0.85rem;
+}
+.navbar-avatar {
+  width: 34px; height: 34px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem;
+}
+
+/* ============================================================
+   PAGINA HOME
+   ============================================================ */
+.hero {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--blue) 100%);
+  color: white;
+  text-align: center;
+  padding: 80px 24px;
+}
+.hero-icon { font-size: 4rem; color: var(--accent); margin-bottom: 16px; }
+.hero h1 { font-size: 3rem; font-weight: 900; margin-bottom: 12px; }
+.hero p { font-size: 1.1rem; color: rgba(255,255,255,0.75); max-width: 500px; margin: 0 auto 32px; }
+.hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  margin: -40px auto 60px;
+  padding: 0 24px;
+}
+.feature-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.feature-icon { font-size: 2.2rem; margin-bottom: 12px; }
+.feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--dark); }
+.feature-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+
+/* ============================================================
+   CARD GENERICA
+   ============================================================ */
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--gray);
+}
+.card-head h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+.container-sm {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* ============================================================
+   FORM STYLES
+   ============================================================ */
+.form-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.form-header .icon { font-size: 2.8rem; color: var(--red); display: block; margin-bottom: 8px; }
+.form-header h2 { font-size: 1.7rem; font-weight: 800; color: var(--dark); margin-bottom: 6px; }
+.form-header p { color: var(--muted); font-size: 0.92rem; }
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4a5568;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  font-family: inherit;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+}
+.field .hint { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width:600px) { .row-2, .row-3 { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--red); color: white; }
+.btn-primary:hover { background: #c62828; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(229,57,53,0.3); }
+.btn-outline { background: transparent; color: var(--red); border: 2px solid var(--red); }
+.btn-outline:hover { background: var(--red); color: white; }
+.btn-ghost { background: var(--gray); color: var(--text); }
+.btn-ghost:hover { background: #e2e8f0; }
+.btn-dark { background: var(--dark); color: white; }
+.btn-dark:hover { background: var(--blue); }
+.btn-full { width: 100%; }
+.btn-sm { padding: 7px 14px; font-size: 0.82rem; border-radius: 8px; }
+.btn-icon {
+  background: none; border: none;
+  color: #cbd5e0; font-size: 1.5rem;
+  cursor: pointer; line-height: 1; padding: 0 4px;
+  transition: color 0.2s; flex-shrink: 0;
+}
+.btn-icon:hover { color: var(--red); }
+
+/* ============================================================
+   MESSAGGI
+   ============================================================ */
+.msg {
+  padding: 13px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: none;
+}
+.msg.ok  { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; }
+.msg.err { background: #fff1f2; color: #9f1239; border-left: 4px solid var(--red); }
+
+.form-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.form-footer a { color: var(--red); font-weight: 700; text-decoration: none; cursor: pointer; }
+.form-footer a:hover { text-decoration: underline; }
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+.dash-header {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--blue) 100%);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  color: white;
+}
+.dash-welcome { display: flex; align-items: center; gap: 16px; }
+.dash-welcome .icon { font-size: 2.2rem; color: var(--accent); }
+.dash-welcome h2 { font-size: 1.35rem; font-weight: 800; margin-bottom: 4px; }
+.dash-welcome .cf { font-size: 0.82rem; color: rgba(255,255,255,0.65); }
+.dash-welcome code {
+  background: rgba(255,255,255,0.15);
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 0.82rem; color: white;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+}
+@media (max-width: 768px) { .dash-grid { grid-template-columns: 1fr; } }
+
+/* QR Card */
+.qr-card { text-align: center; }
+.qr-card h3 { margin-bottom: 16px; font-size: 1rem; }
+.qr-img {
+  border: 4px solid var(--border);
+  border-radius: 10px;
+  display: block;
+  margin: 0 auto 12px;
+  image-rendering: pixelated;
+}
+.qr-hint { font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; }
+
+/* Health items */
+.health-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #fafbfc;
+  transition: background 0.15s, border-color 0.15s;
+}
+.health-item:hover { background: #f0f4f8; border-color: #c4d0e0; }
+.health-info strong { display: block; margin-bottom: 6px; }
+.health-note { margin: 4px 0 0; font-size: 0.8rem; color: var(--muted); }
+
+/* Tags */
+.tag {
+  display: inline-block;
+  background: var(--dark);
+  color: white;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin: 2px 2px 0 0;
+}
+.tag-blue { background: #dbeafe; color: #1d4ed8; }
+.tag-green { background: #dcfce7; color: #166534; }
+
+/* Inline form */
+.inline-form {
+  background: var(--gray);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1.5px dashed var(--border);
+}
+.inline-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+.empty {
+  text-align: center;
+  color: #a0aec0;
+  font-style: italic;
+  padding: 24px 0;
+  font-size: 0.9rem;
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+.admin-header {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--blue) 100%);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  color: white;
+}
+.admin-header h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+.admin-header p { color: rgba(255,255,255,0.65); font-size: 0.9rem; }
+
+.stats-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.stat {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 28px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  min-width: 130px;
+}
+.stat-num { display: block; font-size: 2.2rem; font-weight: 900; color: var(--red); line-height: 1; }
+.stat-lbl { display: block; font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  background: var(--gray);
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+}
+.data-table td {
+  padding: 13px 16px;
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table tr:hover td { background: #fafbfc; }
+.data-table code {
+  background: var(--gray);
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 0.82rem;
+  font-family: 'Courier New', monospace;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.badge-green { background: #dcfce7; color: #166534; }
+.badge-red   { background: #fee2e2; color: #991b1b; }
+
+.info-table { width: 100%; border-collapse: collapse; }
+.info-table th, .info-table td {
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.info-table th { color: var(--muted); font-weight: 600; width: 40%; }
+.info-table code { background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-size: 0.82rem; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   PROFILO EMERGENZA
+   ============================================================ */
+#view-emergenza {
+  background: #fff;
+  min-height: 100vh;
+}
+.emg-top {
+  background: #c62828;
+  color: white;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.emg-top-icon { font-size: 2.2rem; }
+.emg-top h1 { font-size: 1.3rem; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px; }
+.emg-top p  { font-size: 0.82rem; opacity: 0.85; margin: 0; }
+.emg-logo { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 800; opacity: 0.9; }
+
+.emg-body { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
+
+/* Intestazione paziente */
+.emg-patient {
+  background: var(--dark);
+  color: white;
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: start;
+}
+.emg-patient-name {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+.emg-patient-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  font-size: 0.9rem;
+}
+.emg-patient-meta .lbl { color: rgba(255,255,255,0.55); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+.emg-patient-meta .val { color: white; font-weight: 600; }
+.emg-patient-meta code { background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }
+
+/* Badges grandi */
+.emg-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.emg-badge {
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+.emg-badge-blood  { background: #ef9a9a; color: #7f0000; }
+.emg-badge-allerg { background: #fff176; color: #5f3c00; }
+
+/* Sezioni */
+.emg-section {
+  border-radius: 14px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+.emg-section.red  { border-color: #ffcdd2; }
+.emg-section.blue { border-color: #bbdefb; }
+
+.emg-section-head {
+  padding: 14px 22px;
+  font-size: 1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.emg-section.red  .emg-section-head { background: #ffebee; color: #b71c1c; }
+.emg-section.blue .emg-section-head { background: #e3f2fd; color: #0d47a1; }
+.emg-section-count {
+  margin-left: auto;
+  background: rgba(0,0,0,0.12);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+}
+
+.emg-section-body { padding: 4px 0; background: white; }
+
+.emg-item {
+  padding: 16px 22px;
+  border-bottom: 1px solid #f0f0f0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+.emg-item:last-child { border-bottom: none; }
+.emg-item-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+.emg-item-sub { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+.emg-item-right { text-align: right; }
+.emg-dose {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #0d47a1;
+  white-space: nowrap;
+}
+.emg-freq { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.emg-diag { font-size: 0.8rem; color: #b71c1c; margin-top: 2px; }
+
+.emg-empty {
+  padding: 20px 22px;
+  color: #aaa;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* Footer emergenza */
+.emg-footer {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 0.78rem;
+  color: #aaa;
+  line-height: 1.8;
+}
+.emg-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 14px;
+  color: #333;
+}
+.emg-print-btn:hover { background: #e0e0e0; }
+
+/* Nessun profilo trovato */
+.emg-not-found {
+  text-align: center;
+  padding: 80px 20px;
+}
+.emg-not-found .icon { font-size: 4rem; margin-bottom: 16px; display: block; }
+.emg-not-found h2 { font-size: 1.4rem; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+.emg-not-found p  { color: var(--muted); }
+
+@media print {
+  .emg-top, .emg-print-btn, nav { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .emg-print-btn { display: none; }
+}
+
+.timestamp { text-align: center; color: #c4d0e0; font-size: 0.78rem; margin-top: 8px; }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white;
+  border-radius: var(--radius);
+  padding: 32px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: none; border: none;
+  font-size: 1.6rem; cursor: pointer;
+  color: var(--muted); line-height: 1;
+}
+.modal h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; color: var(--dark); }
+
+/* ============================================================
+   PROFILO EDIT
+   ============================================================ */
+#profilo-save-msg { margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar" id="main-navbar">
+  <div class="navbar-brand" onclick="goHome()">
+    <span class="heart">&#10084;</span>
+    <div style="line-height:1.2">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:1px;opacity:0.85">COMUNE DI PARENTI</div>
+      <div style="font-size:1.2rem;font-weight:900;letter-spacing:0.3px">QR Life</div>
+    </div>
+  </div>
+  <div class="navbar-links" id="nav-links">
+    <a onclick="showView('home')">Home</a>
+    <a onclick="showView('registrazione')">Registrati</a>
+    <a onclick="showView('login')">Accedi</a>
+    <a onclick="showView('admin-login')" style="color:rgba(255,255,255,0.4); font-size:0.78rem">Admin</a>
+  </div>
+  <div id="nav-user" style="display:none" class="navbar-user">
+    <div class="navbar-avatar" id="nav-avatar">U</div>
+    <span id="nav-name"></span>
+    <button class="btn btn-sm btn-outline" onclick="logout()" style="margin-left:4px">Esci</button>
+  </div>
+</nav>
+
+<!-- ==================== HOME ==================== -->
+<div class="view active" id="view-home">
+  <div class="hero">
+    <div class="hero-icon">&#10084;</div>
+    <h1>QR Life</h1>
+    <p>La tua salute sempre con te. Un QR code per ogni emergenza.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary" onclick="showView('registrazione')" style="padding:14px 32px; font-size:1rem">Registrati gratis</button>
+      <button class="btn btn-outline" onclick="showView('login')" style="padding:14px 32px; font-size:1rem; border-color:white; color:white">Accedi</button>
+    </div>
+  </div>
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">&#128203;</div>
+      <h3>Dati Sanitari Sicuri</h3>
+      <p>Patologie e terapie farmacologiche sempre aggiornate e protette</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128247;</div>
+      <h3>QR Code Personale</h3>
+      <p>Un codice univoco per accedere al tuo profilo d'emergenza in pochi secondi</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128138;</div>
+      <h3>Terapia Farmacologica</h3>
+      <p>Farmaci, dosaggi in grammi, quantità e frequenza sempre disponibili</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== REGISTRAZIONE ==================== -->
+<div class="view" id="view-registrazione">
+  <div class="container-sm">
+    <div class="card">
+      <div class="form-header">
+        <span class="icon">&#10084;</span>
+        <h2>Registrati a QR Life</h2>
+        <p>Crea il tuo profilo sanitario personale</p>
+      </div>
+      <div class="msg" id="msg-reg"></div>
+      <div class="row-2">
+        <div class="field"><label>Nome *</label><input type="text" id="r-nome" placeholder="Mario" autocomplete="given-name"></div>
+        <div class="field"><label>Cognome *</label><input type="text" id="r-cognome" placeholder="Rossi" autocomplete="family-name"></div>
+      </div>
+      <div class="field">
+        <label>Codice Fiscale *</label>
+        <input type="text" id="r-cf" placeholder="RSSMRA80A01H501A" maxlength="16" style="text-transform:uppercase">
+        <span class="hint">16 caratteri alfanumerici</span>
+      </div>
+      <div class="field"><label>Email *</label><input type="email" id="r-email" placeholder="mario.rossi@email.it" autocomplete="email"></div>
+      <div class="row-2">
+        <div class="field"><label>Password *</label><input type="password" id="r-pwd" placeholder="Min. 8 caratteri"></div>
+        <div class="field"><label>Conferma Password *</label><input type="password" id="r-pwd2" placeholder="Ripeti la password"></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doRegister()">Registrati</button>
+      <p class="form-footer">Hai già un account? <a onclick="showView('login')">Accedi</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== LOGIN ==================== -->
+<div class="view" id="view-login">
+  <div class="container-sm">
+    <div class="card">
+      <div class="form-header">
+        <span class="icon">&#10084;</span>
+        <h2>Accedi a QR Life</h2>
+        <p>Inserisci le tue credenziali</p>
+      </div>
+      <div class="msg" id="msg-login"></div>
+      <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="mario.rossi@email.it" autocomplete="email"></div>
+      <div class="field"><label>Password</label><input type="password" id="l-pwd" placeholder="La tua password"></div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Accedi</button>
+      <p class="form-footer">Non hai un account? <a onclick="showView('registrazione')">Registrati</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DASHBOARD ==================== -->
+<div class="view" id="view-dashboard">
+  <div class="container">
+    <div class="dash-header">
+      <div class="dash-welcome">
+        <span class="icon">&#10084;</span>
+        <div>
+          <h2 id="dash-nome">Mario Rossi</h2>
+          <span class="cf">CF: <code id="dash-cf">RSSMRA80A01H501A</code></span>
+        </div>
+      </div>
+      <button class="btn btn-outline" style="border-color:rgba(255,255,255,0.5);color:white" onclick="logout()">Esci</button>
+    </div>
+
+    <div id="msg-dash" class="msg"></div>
+
+    <div class="dash-grid">
+      <!-- Sidebar -->
+      <div>
+        <div class="card qr-card">
+          <h3>&#128247; Il tuo QR Code</h3>
+          <div id="dash-qr" style="display:inline-block;border:4px solid var(--border);border-radius:10px;overflow:hidden;line-height:0"></div>
+          <p class="qr-hint">In emergenza mostra questo codice al personale sanitario</p>
+          <button class="btn btn-sm btn-outline btn-full" onclick="showEmergencyProfile()">Visualizza profilo</button>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:16px;font-weight:700;color:var(--dark)">&#128100; Dati Personali</h3>
+          <div class="row-2">
+            <div class="field"><label>Data di nascita</label><input type="date" id="p-nascita"></div>
+            <div class="field"><label>Gruppo sanguigno</label>
+              <select id="p-gruppo">
+                <option value="">Non specificato</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+                <option>0+</option><option>0-</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Telefono</label><input type="tel" id="p-tel" placeholder="+39 333 1234567"></div>
+          <div class="field"><label>Allergie / Intolleranze</label><textarea id="p-allergie" rows="2" placeholder="es. Penicillina, lattosio, nichel..."></textarea></div>
+          <div class="field"><label>Indirizzo</label><input type="text" id="p-indirizzo" placeholder="Via Roma 1, Parenti (CS)"></div>
+          <button class="btn btn-sm btn-primary" onclick="saveProfilo()">Salva dati</button>
+          <div class="msg" id="profilo-save-msg"></div>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div>
+        <!-- Patologie -->
+        <div class="card">
+          <div class="card-head">
+            <h3>&#9763; Patologie</h3>
+            <button class="btn btn-sm btn-primary" id="btn-apri-pat" onclick="toggleForm('pat')">+ Aggiungi</button>
+          </div>
+
+          <div class="inline-form" id="form-pat" style="display:none">
+            <div class="row-2">
+              <div class="field"><label>Nome patologia *</label><input type="text" id="pat-nome" placeholder="es. Diabete tipo 2"></div>
+              <div class="field"><label>Data diagnosi</label><input type="date" id="pat-data"></div>
+            </div>
+            <div class="field"><label>Note</label><textarea id="pat-desc" rows="2" placeholder="Eventuali note..."></textarea></div>
+            <div class="inline-actions">
+              <button class="btn btn-sm btn-primary" onclick="addPatologia()">Salva</button>
+              <button class="btn btn-sm btn-ghost" onclick="toggleForm('pat')">Annulla</button>
+            </div>
+          </div>
+
+          <div id="list-pat"></div>
+        </div>
+
+        <!-- Medicine -->
+        <div class="card">
+          <div class="card-head">
+            <h3>&#128138; Terapia Farmacologica</h3>
+            <button class="btn btn-sm btn-primary" id="btn-apri-med" onclick="toggleForm('med')">+ Aggiungi</button>
+          </div>
+
+          <div class="inline-form" id="form-med" style="display:none">
+            <div class="row-2">
+              <div class="field"><label>Nome farmaco *</label><input type="text" id="med-nome" placeholder="es. Metformina"></div>
+              <div class="field"><label>Principio attivo</label><input type="text" id="med-principio" placeholder="es. Metformina cloridrato"></div>
+            </div>
+            <div class="row-3">
+              <div class="field"><label>Dosaggio</label><input type="number" id="med-grammi" placeholder="es. 500" step="0.001" min="0"></div>
+              <div class="field"><label>Unità</label>
+                <select id="med-unita">
+                  <option value="mg">mg</option>
+                  <option value="g">g</option>
+                  <option value="ml">ml</option>
+                  <option value="mcg">mcg</option>
+                  <option value="UI">UI</option>
+                  <option value="compresse">compresse</option>
+                </select>
+              </div>
+              <div class="field"><label>Quantità / dose</label><input type="number" id="med-qta" placeholder="es. 1" step="0.5" min="0"></div>
+            </div>
+            <div class="field"><label>Frequenza</label><input type="text" id="med-freq" placeholder="es. 2 volte al giorno, dopo i pasti"></div>
+            <div class="field"><label>Note</label><textarea id="med-note" rows="2" placeholder="Eventuali note..."></textarea></div>
+            <div class="inline-actions">
+              <button class="btn btn-sm btn-primary" onclick="addMedicina()">Salva</button>
+              <button class="btn btn-sm btn-ghost" onclick="toggleForm('med')">Annulla</button>
+            </div>
+          </div>
+
+          <div id="list-med"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PROFILO EMERGENZA ==================== -->
+<div class="view" id="view-emergenza">
+  <div class="emg-top">
+    <span class="emg-top-icon">🚨</span>
+    <div>
+      <h1>SCHEDA SANITARIA D'EMERGENZA</h1>
+      <p>Comune di Parenti — QR Life — Accesso riservato al personale sanitario</p>
+    </div>
+    <div class="emg-logo">&#10084; QR Life</div>
+  </div>
+  <div class="emg-body" id="emg-body">
+    <!-- Popolato da JS -->
+  </div>
+</div>
+
+<!-- ==================== ADMIN LOGIN ==================== -->
+<div class="view" id="view-admin-login">
+  <div class="container-sm">
+    <div class="card">
+      <div class="form-header">
+        <span class="icon">&#9881;</span>
+        <h2>Accesso Amministratore</h2>
+        <p>Pannello di controllo QR Life</p>
+      </div>
+      <div class="msg" id="msg-admin-login"></div>
+      <div class="field"><label>Username</label><input type="text" id="al-user" placeholder="admin"></div>
+      <div class="field"><label>Password</label><input type="password" id="al-pwd" placeholder="Password"></div>
+      <button class="btn btn-dark btn-full" onclick="doAdminLogin()">Accedi come Admin</button>
+      <p class="form-footer" style="margin-top:14px">
+        <small style="color:#aaa">Demo: username <strong>admin</strong> / password <strong>admin123</strong></small>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ADMIN DASHBOARD ==================== -->
+<div class="view" id="view-admin">
+  <div class="container">
+    <div class="admin-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <h2>&#9881; QR Life — Pannello Amministratore</h2>
+          <p>Gestione cittadini e dati sanitari</p>
+        </div>
+        <button class="btn btn-outline" style="border-color:rgba(255,255,255,0.4);color:white" onclick="adminLogout()">Esci</button>
+      </div>
+    </div>
+
+    <div class="stats-bar" id="admin-stats"></div>
+
+    <div class="card">
+      <h3 style="font-size:1rem;font-weight:800;margin-bottom:16px;color:var(--dark)">Elenco Cittadini</h3>
+      <div style="overflow-x:auto">
+        <table class="data-table" id="admin-table">
+          <thead>
+            <tr>
+              <th>Cognome</th>
+              <th>Nome</th>
+              <th>Codice Fiscale</th>
+              <th>Email</th>
+              <th>Patologie</th>
+              <th>Farmaci</th>
+              <th>Registrato</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ADMIN SCHEDA CITTADINO (modal) ==================== -->
+<div class="modal-overlay" id="modal-cittadino">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<script>
+/* ============================================================
+   STORAGE
+   ============================================================ */
+function load(k) { try { return JSON.parse(localStorage.getItem(k)) || null; } catch(e) { return null; } }
+function save(k,v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+function getUsers()     { return load('ql_users') || []; }
+function getProfili()   { return load('ql_profili') || []; }
+function getPatologie() { return load('ql_patologie') || []; }
+function getMedicine()  { return load('ql_medicine') || []; }
+
+function saveUsers(d)     { save('ql_users', d); }
+function saveProfili(d)   { save('ql_profili', d); }
+function savePatologie(d) { save('ql_patologie', d); }
+function saveMedicine(d)  { save('ql_medicine', d); }
+
+let currentUser = load('ql_current') || null;
+let adminLogged = load('ql_admin') || false;
+
+/* ============================================================
+   NAVIGAZIONE
+   ============================================================ */
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  updateNavbar(v);
+  window.scrollTo(0,0);
+}
+
+function goHome() { showView('home'); }
+
+function updateNavbar(v) {
+  const links = document.getElementById('nav-links');
+  const userArea = document.getElementById('nav-user');
+
+  if (adminLogged) {
+    links.style.display = 'none';
+    userArea.style.display = 'flex';
+    document.getElementById('nav-avatar').textContent = 'A';
+    document.getElementById('nav-name').textContent = 'Amministratore';
+    return;
+  }
+
+  if (currentUser) {
+    links.style.display = 'none';
+    userArea.style.display = 'flex';
+    const p = getProfilo(currentUser.id);
+    document.getElementById('nav-avatar').textContent = (p?.nome[0] || 'U').toUpperCase();
+    document.getElementById('nav-name').textContent = p ? p.nome + ' ' + p.cognome : '';
+  } else {
+    links.style.display = 'flex';
+    userArea.style.display = 'none';
+  }
+}
+
+/* ============================================================
+   UTILS
+   ============================================================ */
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(s) {
+  if (!s) return '—';
+  const [y,m,d] = s.split('-');
+  return d + '/' + m + '/' + y;
+}
+function validaCF(cf) {
+  return /^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}$/.test(cf.toUpperCase());
+}
+function showMsg(id, type, text) {
+  const el = document.getElementById(id);
+  el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+  el.textContent = text;
+  el.style.display = 'block';
+  if (type === 'ok') setTimeout(() => el.style.display = 'none', 3000);
+}
+function getProfilo(userId) {
+  return getProfili().find(p => p.userId === userId) || null;
+}
+function genToken() {
+  return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+}
+
+/* ============================================================
+   REGISTRAZIONE
+   ============================================================ */
+function doRegister() {
+  const nome    = document.getElementById('r-nome').value.trim();
+  const cognome = document.getElementById('r-cognome').value.trim();
+  const cf      = document.getElementById('r-cf').value.trim().toUpperCase();
+  const email   = document.getElementById('r-email').value.trim().toLowerCase();
+  const pwd     = document.getElementById('r-pwd').value;
+  const pwd2    = document.getElementById('r-pwd2').value;
+
+  if (!nome || !cognome || !cf || !email || !pwd) return showMsg('msg-reg','err','Tutti i campi sono obbligatori.');
+  if (!validaCF(cf)) return showMsg('msg-reg','err','Codice Fiscale non valido (16 caratteri alfanumerici nel formato corretto).');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showMsg('msg-reg','err','Email non valida.');
+  if (pwd.length < 8) return showMsg('msg-reg','err','La password deve contenere almeno 8 caratteri.');
+  if (pwd !== pwd2) return showMsg('msg-reg','err','Le password non coincidono.');
+
+  const users = getUsers();
+  if (users.find(u => u.email === email)) return showMsg('msg-reg','err','Email già registrata.');
+  const profili = getProfili();
+  if (profili.find(p => p.cf === cf)) return showMsg('msg-reg','err','Codice Fiscale già registrato.');
+
+  const newUser = { id: uid(), email, pwd, createdAt: new Date().toISOString() };
+  const newProfilo = { userId: newUser.id, nome, cognome, cf, nascita:'', tel:'', indirizzo:'', token: genToken(), createdAt: new Date().toISOString() };
+
+  users.push(newUser);
+  profili.push(newProfilo);
+  saveUsers(users);
+  saveProfili(profili);
+
+  currentUser = newUser;
+  save('ql_current', currentUser);
+  showMsg('msg-reg','ok','Registrazione completata!');
+  setTimeout(() => { loadDashboard(); showView('dashboard'); }, 800);
+}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+function doLogin() {
+  const email = document.getElementById('l-email').value.trim().toLowerCase();
+  const pwd   = document.getElementById('l-pwd').value;
+
+  if (!email || !pwd) return showMsg('msg-login','err','Inserisci email e password.');
+
+  const users = getUsers();
+  const user = users.find(u => u.email === email && u.pwd === pwd);
+  if (!user) return showMsg('msg-login','err','Credenziali errate.');
+
+  currentUser = user;
+  save('ql_current', user);
+  loadDashboard();
+  showView('dashboard');
+}
+
+function logout() {
+  currentUser = null;
+  adminLogged = false;
+  localStorage.removeItem('ql_current');
+  localStorage.removeItem('ql_admin');
+  showView('home');
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function loadDashboard() {
+  if (!currentUser) return;
+  const p = getProfilo(currentUser.id);
+  if (!p) return;
+
+  document.getElementById('dash-nome').textContent = p.nome + ' ' + p.cognome;
+  document.getElementById('dash-cf').textContent = p.cf;
+  document.getElementById('p-nascita').value  = p.nascita  || '';
+  document.getElementById('p-gruppo').value   = p.gruppo   || '';
+  document.getElementById('p-tel').value      = p.tel      || '';
+  document.getElementById('p-allergie').value = p.allergie || '';
+  document.getElementById('p-indirizzo').value= p.indirizzo|| '';
+
+  // QR Code — usa IP di rete invece di localhost per test da smartphone
+  const baseUrl  = window.location.href.split('?')[0].replace('localhost', '192.168.1.84');
+  const emgUrl   = baseUrl + '?token=' + p.token;
+  const qrEl     = document.getElementById('dash-qr');
+  qrEl.innerHTML = '';
+  new QRCode(qrEl, { text: emgUrl, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.H });
+
+  renderPatologie();
+  renderMedicine();
+}
+
+function saveProfilo() {
+  if (!currentUser) return;
+  const profili = getProfili();
+  const idx = profili.findIndex(p => p.userId === currentUser.id);
+  if (idx === -1) return;
+  profili[idx].nascita   = document.getElementById('p-nascita').value;
+  profili[idx].gruppo    = document.getElementById('p-gruppo').value;
+  profili[idx].tel       = document.getElementById('p-tel').value;
+  profili[idx].allergie  = document.getElementById('p-allergie').value;
+  profili[idx].indirizzo = document.getElementById('p-indirizzo').value;
+  saveProfili(profili);
+  showMsg('profilo-save-msg','ok','Dati aggiornati!');
+}
+
+/* ============================================================
+   FORMS TOGGLE
+   ============================================================ */
+function toggleForm(type) {
+  const el = document.getElementById('form-' + type);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+/* ============================================================
+   PATOLOGIE
+   ============================================================ */
+function addPatologia() {
+  const nome = document.getElementById('pat-nome').value.trim();
+  if (!nome) return alert('Inserisci il nome della patologia.');
+
+  const patologie = getPatologie();
+  const newPat = {
+    id: uid(),
+    userId: currentUser.id,
+    nome,
+    desc: document.getElementById('pat-desc').value.trim(),
+    data: document.getElementById('pat-data').value,
+    createdAt: new Date().toISOString()
+  };
+  patologie.push(newPat);
+  savePatologie(patologie);
+
+  document.getElementById('pat-nome').value = '';
+  document.getElementById('pat-desc').value = '';
+  document.getElementById('pat-data').value = '';
+  toggleForm('pat');
+  renderPatologie();
+}
+
+function deletePatologia(id) {
+  if (!confirm('Eliminare questa patologia?')) return;
+  const patologie = getPatologie().filter(p => !(p.id === id && p.userId === currentUser.id));
+  savePatologie(patologie);
+  renderPatologie();
+}
+
+function renderPatologie() {
+  const container = document.getElementById('list-pat');
+  const mine = getPatologie().filter(p => p.userId === currentUser.id);
+
+  if (!mine.length) {
+    container.innerHTML = '<p class="empty">Nessuna patologia inserita.</p>';
+    return;
+  }
+  container.innerHTML = mine.map(p => `
+    <div class="health-item">
+      <div class="health-info">
+        <strong>${escHtml(p.nome)}</strong>
+        ${p.data ? `<span class="tag">${fmtDate(p.data)}</span>` : ''}
+        ${p.desc ? `<p class="health-note">${escHtml(p.desc)}</p>` : ''}
+      </div>
+      <button class="btn-icon" onclick="deletePatologia('${p.id}')" title="Elimina">&times;</button>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   MEDICINE
+   ============================================================ */
+function addMedicina() {
+  const nome = document.getElementById('med-nome').value.trim();
+  if (!nome) return alert('Inserisci il nome del farmaco.');
+
+  const medicine = getMedicine();
+  const newMed = {
+    id: uid(),
+    userId: currentUser.id,
+    nome,
+    principio: document.getElementById('med-principio').value.trim(),
+    grammi:    parseFloat(document.getElementById('med-grammi').value) || null,
+    unita:     document.getElementById('med-unita').value,
+    qta:       parseFloat(document.getElementById('med-qta').value) || null,
+    freq:      document.getElementById('med-freq').value.trim(),
+    note:      document.getElementById('med-note').value.trim(),
+    createdAt: new Date().toISOString()
+  };
+  medicine.push(newMed);
+  saveMedicine(medicine);
+
+  ['med-nome','med-principio','med-grammi','med-qta','med-freq','med-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('med-unita').value = 'mg';
+  toggleForm('med');
+  renderMedicine();
+}
+
+function deleteMedicina(id) {
+  if (!confirm('Eliminare questo farmaco?')) return;
+  const medicine = getMedicine().filter(m => !(m.id === id && m.userId === currentUser.id));
+  saveMedicine(medicine);
+  renderMedicine();
+}
+
+function renderMedicine() {
+  const container = document.getElementById('list-med');
+  const mine = getMedicine().filter(m => m.userId === currentUser.id);
+
+  if (!mine.length) {
+    container.innerHTML = '<p class="empty">Nessun farmaco inserito.</p>';
+    return;
+  }
+  container.innerHTML = mine.map(m => `
+    <div class="health-item">
+      <div class="health-info">
+        <strong>${escHtml(m.nome)}</strong>
+        ${m.grammi ? `<span class="tag">${m.grammi} ${m.unita}</span>` : ''}
+        ${m.qta ? `<span class="tag">×${m.qta}</span>` : ''}
+        ${m.principio ? `<span class="tag tag-blue">${escHtml(m.principio)}</span>` : ''}
+        ${m.freq ? `<p class="health-note">${escHtml(m.freq)}</p>` : ''}
+        ${m.note ? `<p class="health-note">${escHtml(m.note)}</p>` : ''}
+      </div>
+      <button class="btn-icon" onclick="deleteMedicina('${m.id}')" title="Elimina">&times;</button>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   PROFILO EMERGENZA
+   ============================================================ */
+function renderEmergenza(p, pats, meds) {
+  const now = new Date();
+  const eta = p.nascita ? Math.floor((now - new Date(p.nascita)) / 31557600000) : null;
+
+  const patsHtml = pats.length
+    ? pats.map(x => `
+        <div class="emg-item">
+          <div>
+            <div class="emg-item-name">${escHtml(x.nome)}</div>
+            ${x.desc ? `<div class="emg-item-sub">${escHtml(x.desc)}</div>` : ''}
+            ${x.data ? `<div class="emg-diag">Diagnosi: ${fmtDate(x.data)}</div>` : ''}
+          </div>
+        </div>`).join('')
+    : '<div class="emg-empty">Nessuna patologia registrata.</div>';
+
+  const medsHtml = meds.length
+    ? meds.map(m => `
+        <div class="emg-item">
+          <div>
+            <div class="emg-item-name">${escHtml(m.nome)}</div>
+            ${m.principio ? `<div class="emg-item-sub">${escHtml(m.principio)}</div>` : ''}
+            ${m.freq ? `<div class="emg-item-sub">&#128337; ${escHtml(m.freq)}</div>` : ''}
+            ${m.note ? `<div class="emg-item-sub">&#128221; ${escHtml(m.note)}</div>` : ''}
+          </div>
+          <div class="emg-item-right">
+            ${m.grammi ? `<div class="emg-dose">${m.grammi} ${m.unita}</div>` : ''}
+            ${m.qta ? `<div class="emg-freq">× ${m.qta} dose/volta</div>` : ''}
+          </div>
+        </div>`).join('')
+    : '<div class="emg-empty">Nessuna terapia farmacologica registrata.</div>';
+
+  document.getElementById('emg-body').innerHTML = `
+    <div class="emg-patient">
+      <div>
+        <div class="emg-patient-name">${escHtml(p.cognome.toUpperCase())}<br>${escHtml(p.nome)}</div>
+        <div class="emg-patient-meta">
+          <span class="lbl">Cod. Fiscale</span> <span class="val"><code>${escHtml(p.cf)}</code></span>
+          ${p.nascita ? `<span class="lbl">Data di nascita</span><span class="val">${fmtDate(p.nascita)}${eta ? ` (${eta} anni)` : ''}</span>` : ''}
+          ${p.tel     ? `<span class="lbl">Telefono</span><span class="val">${escHtml(p.tel)}</span>` : ''}
+          ${p.indirizzo ? `<span class="lbl">Indirizzo</span><span class="val">${escHtml(p.indirizzo)}</span>` : ''}
+        </div>
+        <div class="emg-badges">
+          ${p.gruppo   ? `<span class="emg-badge emg-badge-blood">&#129657; Gruppo ${escHtml(p.gruppo)}</span>` : ''}
+          ${p.allergie ? `<span class="emg-badge emg-badge-allerg">&#9888;&#65039; ALLERGIE: ${escHtml(p.allergie)}</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:center;color:rgba(255,255,255,0.6);font-size:0.75rem">
+        <div style="font-size:2.5rem">&#10084;</div>
+        QR Life<br>Comune di Parenti
+      </div>
+    </div>
+
+    <div class="emg-section red">
+      <div class="emg-section-head">
+        🩺 PATOLOGIE / CONDIZIONI NOTE
+        <span class="emg-section-count">${pats.length}</span>
+      </div>
+      <div class="emg-section-body">${patsHtml}</div>
+    </div>
+
+    <div class="emg-section blue">
+      <div class="emg-section-head">
+        💊 TERAPIA FARMACOLOGICA IN CORSO
+        <span class="emg-section-count">${meds.length}</span>
+      </div>
+      <div class="emg-section-body">${medsHtml}</div>
+    </div>
+
+    <div class="emg-footer">
+      <button class="emg-print-btn" onclick="window.print()">🖨️ Stampa scheda</button><br>
+      Ultimo aggiornamento: ${now.toLocaleDateString('it-IT')} ${now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}<br>
+      QR Life — Comune di Parenti (CS) — Dati forniti dal cittadino
+    </div>
+  `;
+}
+
+function showEmergencyProfile() {
+  if (!currentUser) return;
+  const p    = getProfilo(currentUser.id);
+  if (!p) return;
+  const pats = getPatologie().filter(x => x.userId === currentUser.id);
+  const meds = getMedicine().filter(x => x.userId === currentUser.id);
+  renderEmergenza(p, pats, meds);
+  showView('emergenza');
+}
+
+/* Apertura da QR (URL con ?token=) */
+function openByToken(token) {
+  const profili = getProfili();
+  const p = profili.find(x => x.token === token);
+  if (!p) {
+    document.getElementById('emg-body').innerHTML = `
+      <div class="emg-not-found">
+        <span class="icon">&#10060;</span>
+        <h2>Profilo non trovato</h2>
+        <p>Il codice QR non corrisponde a nessun profilo registrato.</p>
+      </div>`;
+    showView('emergenza');
+    return;
+  }
+  const pats = getPatologie().filter(x => x.userId === p.userId);
+  const meds = getMedicine().filter(x => x.userId === p.userId);
+  renderEmergenza(p, pats, meds);
+  showView('emergenza');
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+function doAdminLogin() {
+  const u = document.getElementById('al-user').value.trim();
+  const p = document.getElementById('al-pwd').value;
+  if (u === 'admin' && p === 'admin123') {
+    adminLogged = true;
+    save('ql_admin', true);
+    loadAdmin();
+    showView('admin');
+  } else {
+    showMsg('msg-admin-login','err','Credenziali errate. (admin / admin123)');
+  }
+}
+
+function adminLogout() {
+  adminLogged = false;
+  localStorage.removeItem('ql_admin');
+  showView('home');
+}
+
+function loadAdmin() {
+  const profili   = getProfili();
+  const patologie = getPatologie();
+  const medicine  = getMedicine();
+
+  // Stats
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="stat"><span class="stat-num">${profili.length}</span><span class="stat-lbl">Cittadini</span></div>
+    <div class="stat"><span class="stat-num">${patologie.length}</span><span class="stat-lbl">Patologie</span></div>
+    <div class="stat"><span class="stat-num">${medicine.length}</span><span class="stat-lbl">Farmaci</span></div>
+  `;
+
+  // Tabella
+  if (!profili.length) {
+    document.getElementById('admin-tbody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#aaa;padding:32px;font-style:italic">Nessun cittadino registrato.</td></tr>`;
+    return;
+  }
+
+  const users = getUsers();
+  document.getElementById('admin-tbody').innerHTML = profili.map(p => {
+    const user = users.find(u => u.id === p.userId);
+    const nPat = patologie.filter(x => x.userId === p.userId).length;
+    const nMed = medicine.filter(x => x.userId === p.userId).length;
+    const dt = new Date(p.createdAt);
+    return `
+      <tr>
+        <td><strong>${escHtml(p.cognome)}</strong></td>
+        <td>${escHtml(p.nome)}</td>
+        <td><code>${escHtml(p.cf)}</code></td>
+        <td>${user ? escHtml(user.email) : '—'}</td>
+        <td>${nPat ? `<span class="badge badge-green">${nPat}</span>` : '<span style="color:#aaa">0</span>'}</td>
+        <td>${nMed ? `<span class="badge badge-green">${nMed}</span>` : '<span style="color:#aaa">0</span>'}</td>
+        <td>${dt.toLocaleDateString('it-IT')}</td>
+        <td><button class="btn btn-sm btn-primary" onclick="openCittadino('${p.userId}')">Visualizza</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openCittadino(userId) {
+  const p    = getProfilo(userId);
+  const user = getUsers().find(u => u.id === userId);
+  const pats = getPatologie().filter(x => x.userId === userId);
+  const meds = getMedicine().filter(x => x.userId === userId);
+
+  const qrData = encodeURIComponent(window.location.href.split('?')[0] + '#profilo-' + p.token);
+  const qrUrl  = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + qrData;
+
+  document.getElementById('modal-content').innerHTML = `
+    <h3 style="color:var(--dark);margin-bottom:20px">&#128100; ${escHtml(p.cognome + ' ' + p.nome)}</h3>
+    <div class="grid-2">
+      <div>
+        <table class="info-table">
+          <tr><th>Codice Fiscale</th><td><code>${escHtml(p.cf)}</code></td></tr>
+          <tr><th>Email</th><td>${user ? escHtml(user.email) : '—'}</td></tr>
+          ${p.nascita ? `<tr><th>Data di nascita</th><td>${fmtDate(p.nascita)}</td></tr>` : ''}
+          ${p.tel ? `<tr><th>Telefono</th><td>${escHtml(p.tel)}</td></tr>` : ''}
+          ${p.indirizzo ? `<tr><th>Indirizzo</th><td>${escHtml(p.indirizzo)}</td></tr>` : ''}
+          <tr><th>Registrato il</th><td>${new Date(p.createdAt).toLocaleDateString('it-IT')}</td></tr>
+        </table>
+      </div>
+      <div style="text-align:center">
+        <img src="${qrUrl}" width="160" height="160" style="border:3px solid var(--border);border-radius:8px" alt="QR">
+        <p style="font-size:0.75rem;color:#aaa;margin-top:8px">QR Code sanitario</p>
+      </div>
+    </div>
+
+    <h4 style="margin:20px 0 10px;font-size:0.95rem;font-weight:800">&#9763; Patologie (${pats.length})</h4>
+    ${pats.length ? `<table class="data-table" style="font-size:0.82rem">
+      <thead><tr><th>Patologia</th><th>Data diagnosi</th><th>Note</th></tr></thead>
+      <tbody>${pats.map(x => `<tr>
+        <td><strong>${escHtml(x.nome)}</strong></td>
+        <td>${fmtDate(x.data)}</td>
+        <td>${escHtml(x.desc || '—')}</td>
+      </tr>`).join('')}</tbody>
+    </table>` : '<p class="empty" style="padding:12px 0">Nessuna patologia.</p>'}
+
+    <h4 style="margin:20px 0 10px;font-size:0.95rem;font-weight:800">&#128138; Terapia Farmacologica (${meds.length})</h4>
+    ${meds.length ? `<table class="data-table" style="font-size:0.82rem">
+      <thead><tr><th>Farmaco</th><th>Dosaggio</th><th>Qtà</th><th>Frequenza</th></tr></thead>
+      <tbody>${meds.map(m => `<tr>
+        <td><strong>${escHtml(m.nome)}</strong>${m.principio ? `<br><small style="color:#aaa">${escHtml(m.principio)}</small>` : ''}</td>
+        <td>${m.grammi ? `${m.grammi} ${m.unita}` : '—'}</td>
+        <td>${m.qta || '—'}</td>
+        <td>${escHtml(m.freq || '—')}</td>
+      </tr>`).join('')}</tbody>
+    </table>` : '<p class="empty" style="padding:12px 0">Nessun farmaco.</p>'}
+  `;
+
+  document.getElementById('modal-cittadino').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-cittadino').classList.remove('open');
+}
+
+/* Chiudi modal cliccando fuori */
+document.getElementById('modal-cittadino').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+/* Enter sui form di login */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const v = document.querySelector('.view.active')?.id;
+    if (v === 'view-login') doLogin();
+    if (v === 'view-registrazione') doRegister();
+    if (v === 'view-admin-login') doAdminLogin();
+  }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener('load', function() {
+  // Apertura da QR: index.html?token=XXX
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+  if (token) { openByToken(token); return; }
+
+  if (adminLogged) { loadAdmin(); showView('admin'); }
+  else if (currentUser) { loadDashboard(); showView('dashboard'); }
+  else showView('home');
+});
+</script>
+</body>
+</html>
