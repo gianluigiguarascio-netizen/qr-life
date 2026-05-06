@@ -25,9 +25,10 @@ class QRLife_Health {
         check_ajax_referer( 'qrlife_nonce', 'nonce' );
         $user_id = $this->check_citizen();
 
-        $nome         = sanitize_text_field( $_POST['nome'] ?? '' );
-        $descrizione  = sanitize_textarea_field( $_POST['descrizione'] ?? '' );
+        $nome          = sanitize_text_field( $_POST['nome'] ?? '' );
+        $descrizione   = sanitize_textarea_field( $_POST['descrizione'] ?? '' );
         $data_diagnosi = sanitize_text_field( $_POST['data_diagnosi'] ?? '' );
+        $critica       = intval( $_POST['critica'] ?? 0 ) ? 1 : 0;
 
         if ( ! $nome ) {
             wp_send_json_error( 'Il nome della patologia è obbligatorio.' );
@@ -35,13 +36,20 @@ class QRLife_Health {
 
         global $wpdb;
         $wpdb->insert( "{$wpdb->prefix}qrlife_patologie", array(
-            'user_id'      => $user_id,
-            'nome'         => $nome,
-            'descrizione'  => $descrizione,
-            'data_diagnosi'=> $data_diagnosi ?: null,
+            'user_id'       => $user_id,
+            'nome'          => $nome,
+            'descrizione'   => $descrizione,
+            'data_diagnosi' => $data_diagnosi ?: null,
+            'critica'       => $critica,
         ) );
 
-        wp_send_json_success( array( 'id' => $wpdb->insert_id, 'nome' => $nome, 'descrizione' => $descrizione, 'data_diagnosi' => $data_diagnosi ) );
+        wp_send_json_success( array(
+            'id'            => $wpdb->insert_id,
+            'nome'          => $nome,
+            'descrizione'   => $descrizione,
+            'data_diagnosi' => $data_diagnosi,
+            'critica'       => $critica,
+        ) );
     }
 
     public function delete_patologia() {
@@ -65,6 +73,7 @@ class QRLife_Health {
         $unita     = sanitize_text_field( $_POST['unita'] ?? 'mg' );
         $frequenza = sanitize_text_field( $_POST['frequenza'] ?? '' );
         $note      = sanitize_textarea_field( $_POST['note'] ?? '' );
+        $salvavita = intval( $_POST['salvavita'] ?? 0 ) ? 1 : 0;
 
         if ( ! $nome ) {
             wp_send_json_error( 'Il nome del farmaco è obbligatorio.' );
@@ -77,14 +86,15 @@ class QRLife_Health {
 
         global $wpdb;
         $wpdb->insert( "{$wpdb->prefix}qrlife_medicine", array(
-            'user_id'  => $user_id,
-            'nome'     => $nome,
-            'principio'=> $principio,
-            'grammi'   => $grammi ?: null,
-            'quantita' => $quantita ?: null,
-            'unita'    => $unita,
-            'frequenza'=> $frequenza,
-            'note'     => $note,
+            'user_id'   => $user_id,
+            'nome'      => $nome,
+            'principio' => $principio,
+            'grammi'    => $grammi ?: null,
+            'quantita'  => $quantita ?: null,
+            'unita'     => $unita,
+            'frequenza' => $frequenza,
+            'note'      => $note,
+            'salvavita' => $salvavita,
         ) );
 
         wp_send_json_success( array(
@@ -96,6 +106,7 @@ class QRLife_Health {
             'unita'     => $unita,
             'frequenza' => $frequenza,
             'note'      => $note,
+            'salvavita' => $salvavita,
         ) );
     }
 

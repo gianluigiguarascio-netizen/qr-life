@@ -3,6 +3,7 @@
  *  @var array  $patologie
  *  @var array  $medicine
  */
+$log_accessi = QRLife_DB::get_log_by_profilo( $profilo->user_id, 10 );
 ?>
 <div class="qrlife-wrap qrlife-dashboard">
 
@@ -12,7 +13,7 @@
             <span class="qrlife-icon">&#10084;</span>
             <div>
                 <h2>Benvenuto, <?php echo esc_html( $profilo->nome . ' ' . $profilo->cognome ); ?></h2>
-                <p>CF: <code><?php echo esc_html( $profilo->codice_fiscale ); ?></code></p>
+                <p>CF: <code><?php echo esc_html( $profilo->codice_fiscale ); ?></code> — Comune di Parenti</p>
             </div>
         </div>
         <button id="qrlife-logout-btn" class="qrlife-btn qrlife-btn-outline">Esci</button>
@@ -28,9 +29,10 @@
             <div class="qrlife-card qrlife-qr-card">
                 <h3>Il tuo QR Code Sanitario</h3>
                 <?php echo QRLife_QR::render_qr( $profilo->token, 180 ); ?>
-                <p class="qrlife-qr-hint">In caso di emergenza, mostra questo codice al personale sanitario</p>
+                <p class="qrlife-qr-hint">In caso di emergenza, mostra questo codice al personale sanitario.<br>
+                <strong>Solo i dati vitali</strong> saranno visibili. La scheda completa richiede credenziali mediche.</p>
                 <a href="<?php echo esc_url( home_url( '/qrlife-profilo/?token=' . $profilo->token ) ); ?>"
-                   target="_blank" class="qrlife-btn qrlife-btn-sm qrlife-btn-outline">Visualizza profilo pubblico</a>
+                   target="_blank" class="qrlife-btn qrlife-btn-sm qrlife-btn-outline">Anteprima profilo emergenza</a>
             </div>
 
             <div class="qrlife-card">
@@ -46,7 +48,7 @@
                     </div>
                     <div class="qrlife-field">
                         <label>Indirizzo</label>
-                        <textarea name="indirizzo" rows="2" placeholder="Via Roma 1, Milano"><?php echo esc_textarea( $profilo->indirizzo ); ?></textarea>
+                        <textarea name="indirizzo" rows="2" placeholder="Via Roma 1, Parenti"><?php echo esc_textarea( $profilo->indirizzo ); ?></textarea>
                     </div>
                     <button type="submit" class="qrlife-btn qrlife-btn-sm qrlife-btn-primary">Salva</button>
                 </form>
@@ -63,7 +65,6 @@
                     <button class="qrlife-btn qrlife-btn-sm qrlife-btn-primary" id="btn-open-patologia">+ Aggiungi</button>
                 </div>
 
-                <!-- Form aggiungi patologia -->
                 <div id="form-patologia" class="qrlife-inline-form" style="display:none;">
                     <div class="qrlife-form-row qrlife-form-row-2">
                         <div class="qrlife-field">
@@ -79,6 +80,12 @@
                         <label>Note / descrizione</label>
                         <textarea id="pat-desc" rows="2" placeholder="Eventuali note..."></textarea>
                     </div>
+                    <div class="qrlife-field qrlife-checkbox-field">
+                        <label class="qrlife-checkbox-label">
+                            <input type="checkbox" id="pat-critica">
+                            <span><strong>Patologia critica</strong> — visibile ai soccorritori tramite scansione QR</span>
+                        </label>
+                    </div>
                     <div class="qrlife-inline-form-actions">
                         <button class="qrlife-btn qrlife-btn-sm qrlife-btn-primary" id="btn-save-patologia">Salva patologia</button>
                         <button class="qrlife-btn qrlife-btn-sm qrlife-btn-ghost" id="btn-cancel-patologia">Annulla</button>
@@ -93,6 +100,9 @@
                     <div class="qrlife-health-item" data-id="<?php echo $pat->id; ?>">
                         <div class="qrlife-health-info">
                             <strong><?php echo esc_html( $pat->nome ); ?></strong>
+                            <?php if ( $pat->critica ) : ?>
+                                <span class="qrlife-tag qrlife-tag-critical">Critica</span>
+                            <?php endif; ?>
                             <?php if ( $pat->data_diagnosi ) : ?>
                                 <span class="qrlife-tag"><?php echo date_i18n( 'd/m/Y', strtotime( $pat->data_diagnosi ) ); ?></span>
                             <?php endif; ?>
@@ -114,7 +124,6 @@
                     <button class="qrlife-btn qrlife-btn-sm qrlife-btn-primary" id="btn-open-medicina">+ Aggiungi</button>
                 </div>
 
-                <!-- Form aggiungi medicina -->
                 <div id="form-medicina" class="qrlife-inline-form" style="display:none;">
                     <div class="qrlife-form-row qrlife-form-row-2">
                         <div class="qrlife-field">
@@ -155,6 +164,12 @@
                         <label>Note</label>
                         <textarea id="med-note" rows="2" placeholder="Eventuali note..."></textarea>
                     </div>
+                    <div class="qrlife-field qrlife-checkbox-field">
+                        <label class="qrlife-checkbox-label">
+                            <input type="checkbox" id="med-salvavita">
+                            <span><strong>Farmaco salvavita</strong> — visibile ai soccorritori tramite scansione QR</span>
+                        </label>
+                    </div>
                     <div class="qrlife-inline-form-actions">
                         <button class="qrlife-btn qrlife-btn-sm qrlife-btn-primary" id="btn-save-medicina">Salva farmaco</button>
                         <button class="qrlife-btn qrlife-btn-sm qrlife-btn-ghost" id="btn-cancel-medicina">Annulla</button>
@@ -169,6 +184,9 @@
                     <div class="qrlife-health-item" data-id="<?php echo $med->id; ?>">
                         <div class="qrlife-health-info">
                             <strong><?php echo esc_html( $med->nome ); ?></strong>
+                            <?php if ( $med->salvavita ) : ?>
+                                <span class="qrlife-tag qrlife-tag-critical">Salvavita</span>
+                            <?php endif; ?>
                             <?php if ( $med->grammi ) : ?>
                                 <span class="qrlife-tag"><?php echo esc_html( $med->grammi . ' ' . $med->unita ); ?></span>
                             <?php endif; ?>
@@ -190,6 +208,36 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
                 </div>
+            </div>
+
+            <!-- Log accessi al profilo -->
+            <?php if ( ! empty( $log_accessi ) ) : ?>
+            <div class="qrlife-card">
+                <h3>&#128274; Ultimi accessi al tuo profilo</h3>
+                <p class="qrlife-hint">Ogni scansione del tuo QR o accesso medico viene registrato.</p>
+                <div class="qrlife-log-list">
+                    <?php foreach ( $log_accessi as $log ) : ?>
+                    <div class="qrlife-log-item">
+                        <span class="qrlife-log-date"><?php echo date_i18n( 'd/m/Y H:i', strtotime( $log->created_at ) ); ?></span>
+                        <span class="qrlife-tag <?php echo $log->tipo_accesso === 'medico' ? '' : 'qrlife-tag-critical'; ?>">
+                            <?php echo esc_html( ucfirst( $log->tipo_accesso ) ); ?>
+                        </span>
+                        <?php if ( $log->med_cognome ) : ?>
+                            <span>Dr. <?php echo esc_html( $log->med_cognome . ' ' . $log->med_nome ); ?></span>
+                        <?php endif; ?>
+                        <span class="qrlife-tag qrlife-tag-light"><?php echo esc_html( ucfirst( $log->dati_mostrati ) ); ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Cancellazione account -->
+            <div class="qrlife-card qrlife-card-danger">
+                <h3>&#128465; Cancella il tuo account</h3>
+                <p>Ai sensi dell'art. 17 del GDPR (diritto all'oblio), puoi cancellare tutti i tuoi dati in modo definitivo e irreversibile.
+                Verranno eliminati: profilo, patologie, farmaci e credenziali di accesso.</p>
+                <button id="qrlife-cancella-account" class="qrlife-btn qrlife-btn-sm qrlife-btn-danger">Cancella tutti i miei dati</button>
             </div>
 
         </div><!-- .qrlife-dash-main -->

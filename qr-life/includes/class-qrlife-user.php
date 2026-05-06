@@ -8,6 +8,7 @@ class QRLife_User {
         add_action( 'wp_ajax_nopriv_qrlife_login',    array( $this, 'handle_login' ) );
         add_action( 'wp_ajax_qrlife_login',            array( $this, 'handle_login' ) );
         add_action( 'wp_ajax_qrlife_logout',           array( $this, 'handle_logout' ) );
+        add_action( 'wp_ajax_qrlife_cancella_account',  array( $this, 'handle_cancella_account' ) );
     }
 
     public static function valida_cf( $cf ) {
@@ -24,9 +25,14 @@ class QRLife_User {
         $email   = sanitize_email( $_POST['email'] ?? '' );
         $pwd     = $_POST['password'] ?? '';
         $pwd2    = $_POST['password2'] ?? '';
+        $gdpr    = intval( $_POST['consenso_gdpr'] ?? 0 );
 
         if ( ! $cf || ! $nome || ! $cognome || ! $email || ! $pwd ) {
             wp_send_json_error( 'Tutti i campi sono obbligatori.' );
+        }
+
+        if ( ! $gdpr ) {
+            wp_send_json_error( 'Devi acconsentire al trattamento dei dati personali per procedere.' );
         }
 
         if ( ! self::valida_cf( $cf ) ) {
@@ -51,8 +57,7 @@ class QRLife_User {
 
         global $wpdb;
         $cf_exists = $wpdb->get_var( $wpdb->prepare(
-            "SELECT id FROM {$wpdb->prefix}qrlife_profili WHERE codice_fiscale = %s",
-            $cf
+            "SELECT id FROM {$wpdb->prefix}qrlife_profili WHERE codice_fiscale = %s", $cf
         ) );
         if ( $cf_exists ) {
             wp_send_json_error( 'Codice fiscale già registrato.' );
@@ -70,11 +75,13 @@ class QRLife_User {
         $token = wp_generate_password( 32, false );
 
         $wpdb->insert( "{$wpdb->prefix}qrlife_profili", array(
-            'user_id'       => $user_id,
-            'codice_fiscale'=> $cf,
-            'nome'          => $nome,
-            'cognome'       => $cognome,
-            'token'         => $token,
+            'user_id'        => $user_id,
+            'codice_fiscale' => $cf,
+            'nome'           => $nome,
+            'cognome'        => $cognome,
+            'token'          => $token,
+            'consenso_gdpr'  => 1,
+            'consenso_data'  => current_time( 'mysql' ),
         ) );
 
         wp_set_current_user( $user_id );
@@ -111,5 +118,24 @@ class QRLife_User {
     public function handle_logout() {
         wp_logout();
         wp_send_json_success( array( 'redirect' => home_url( '/qrlife-login/' ) ) );
+    }
+
+    public function handle_cancella_account() {
+        check_ajax_referer( 'qrlife_nonce', 'nonce' );
+        if ( ! is_user_logged_in() ) wp_send_json_error( 'Non autorizzato.' );
+
+        $user_id = get_current_user_id();
+        $user = wp_get_current_user();
+        if ( ! in_array( 'qrlife_citizen', (array) $user->roles ) ) {
+            wp_send_json_error( 'Operazione non consentita.' );
+        }
+
+        wp_logout();
+        QRLife_DB::cancella_cittadino( $user_id );
+
+        wp_send_json_success( array(
+            'redirect' => home_url( '/qrlife-login/' ),
+            'message'  => 'Account e tutti i dati sanitari cancellati definitivamente.',
+        ) );
     }
 }

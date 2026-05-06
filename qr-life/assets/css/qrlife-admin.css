@@ -167,3 +167,58 @@
 .qrlife-qr-hint { font-size: 0.8rem; color: #aaa; }
 
 .qrlife-empty { color: #bbb; font-style: italic; text-align: center; padding: 24px 0; }
+
+/* ═══════ v2 — Nuovi stili admin ═══════ */
+
+.qrlife-stats-bar { flex-wrap: wrap; }
+
+.qrlife-badge.critical { background: #ffebee; color: #c62828; }
+
+/* Form grid per creazione medici */
+.qrlife-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+}
+@media (max-width: 700px) { .qrlife-form-grid { grid-template-columns: 1fr; } }
+
+.qrlife-form-grid .qrlife-field { margin-bottom: 0; }
+.qrlife-form-grid .qrlife-field label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 4px;
+}
+.qrlife-form-grid .qrlife-field label small {
+    font-weight: 400;
+    color: #999;
+}
+.qrlife-form-grid .qrlife-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid var(--ql-border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+.qrlife-form-grid .qrlife-field input:focus {
+    border-color: var(--ql-red);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(229,57,53,0.1);
+}
+
+/* Messages admin */
+.qrlife-msg {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+.qrlife-msg.success { background: #e8f5e9; color: #2e7d32; border-left: 3px solid #43a047; }
+.qrlife-msg.error   { background: #ffebee; color: #c62828; border-left: 3px solid var(--ql-red); }
+
+/* Pagination */
+.tablenav { margin-top: 16px; }
+.tablenav-pages { display: flex; gap: 4px; justify-content: center; }

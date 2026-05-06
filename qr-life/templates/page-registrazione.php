@@ -4,7 +4,7 @@
         <div class="qrlife-form-header">
             <span class="qrlife-icon">&#10084;</span>
             <h2>Registrati a QR Life</h2>
-            <p>Crea il tuo profilo sanitario personale</p>
+            <p>Comune di Parenti — Crea il tuo profilo sanitario personale</p>
         </div>
 
         <div id="qrlife-msg" class="qrlife-msg" style="display:none;"></div>
@@ -42,6 +42,15 @@
                     <label for="reg-pwd2">Conferma Password *</label>
                     <input type="password" id="reg-pwd2" name="password2" placeholder="Ripeti la password" required autocomplete="new-password">
                 </div>
+            </div>
+
+            <div class="qrlife-field qrlife-checkbox-field">
+                <label class="qrlife-checkbox-label">
+                    <input type="checkbox" name="consenso_gdpr" value="1" required>
+                    <span>Acconsento al trattamento dei miei dati personali e sanitari ai sensi del Reg. UE 2016/679 (GDPR), art. 9.
+                    I dati saranno accessibili esclusivamente ai medici autorizzati dal Comune di Parenti e agli operatori di soccorso (solo dati vitali).
+                    Posso revocare il consenso e cancellare i miei dati in qualsiasi momento dalla mia area personale.</span>
+                </label>
             </div>
 
             <button type="submit" class="qrlife-btn qrlife-btn-primary qrlife-btn-full">
