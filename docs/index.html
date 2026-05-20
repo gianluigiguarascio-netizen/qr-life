@@ -880,10 +880,13 @@ body {
 
       <!-- Video a sinistra -->
       <div>
-        <div style="border-radius:18px;overflow:hidden;box-shadow:0 16px 56px rgba(0,0,0,0.5);background:#000">
-          <video controls autoplay playsinline style="width:100%;display:block">
+        <div style="border-radius:18px;overflow:hidden;box-shadow:0 16px 56px rgba(0,0,0,0.5);background:#000;position:relative" id="video-wrap">
+          <video id="hero-video" controls autoplay muted playsinline style="width:100%;display:block">
             <source src="avatar.mp4" type="video/mp4">
           </video>
+          <div id="unmute-banner" onclick="unmuteVideo()" style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.75);color:white;text-align:center;padding:10px;cursor:pointer;font-size:0.85rem;font-weight:700;letter-spacing:0.5px">
+            🔊 Tocca per attivare l'audio
+          </div>
         </div>
         <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:8px;text-align:center">&#127909; Presentazione QR Life — Comune di Parenti (CS)</p>
       </div>
@@ -1383,6 +1386,15 @@ function saveMedicine(d)  { save('ql_medicine', d); }
 
 let currentUser = load('ql_current') || null;
 let adminLogged = load('ql_admin') || false;
+
+function unmuteVideo() {
+  const v = document.getElementById('hero-video');
+  if (!v) return;
+  v.muted = false;
+  v.play();
+  const b = document.getElementById('unmute-banner');
+  if (b) b.style.display = 'none';
+}
 
 function testAccesso() {
   const users = getUsers();
