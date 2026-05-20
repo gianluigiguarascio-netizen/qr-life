@@ -2122,7 +2122,8 @@ window.addEventListener('load', function() {
   if (token) { openByToken(token); return; }
 
   if (adminLogged) { loadAdmin(); showView('admin'); }
-  else { testAccesso(); }
+  else if (currentUser) { loadDashboard(); showView('dashboard'); }
+  else showView('home');
 });
 </script>
 </body>
